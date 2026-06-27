@@ -39,6 +39,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const requestRef = useRef<RequestCreateAccount | null>(null);
+  // Mirror of `address` so connect() always sees the latest value without
+  // being recreated, avoiding a re-trigger of the host create/login flow.
+  const addressRef = useRef<`0x${string}` | null>(null);
+
+  function applyAddress(addr: string | null) {
+    const next = (addr ? (addr.toLowerCase() as `0x${string}`) : null);
+    addressRef.current = next;
+    setAddress(next);
+  }
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -52,9 +61,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         const rca = (mod as { requestCreateAccount?: RequestCreateAccount })
           .requestCreateAccount;
         requestRef.current = rca ?? null;
-        unsubscribe = onWalletChange((addr) =>
-          setAddress((addr as `0x${string}` | null) ?? null)
-        );
+        // Existing accounts auto-connect here — no popup needed.
+        unsubscribe = onWalletChange((addr) => applyAddress(addr ?? null));
       })
       .catch((err) => console.error('[miniapp-sdk] failed to load:', err));
 
@@ -66,6 +74,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   async function connect() {
     setConnectError(null);
+    // Already connected (e.g. auto-connected via onWalletChange) — don't
+    // re-open the host's "create account / log in" popup.
+    if (addressRef.current) return;
     const req = requestRef.current;
     if (!req) {
       setConnectError('Open Golazo inside the Circles app to connect your wallet.');
@@ -74,7 +85,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setConnecting(true);
     try {
       const { address: addr } = await req();
-      if (addr) setAddress(addr.toLowerCase() as `0x${string}`);
+      if (addr) applyAddress(addr);
     } catch (err) {
       setConnectError(err instanceof Error ? err.message : 'Connection cancelled.');
     } finally {

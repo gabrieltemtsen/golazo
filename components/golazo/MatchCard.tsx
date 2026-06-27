@@ -82,7 +82,7 @@ export function MatchCard({
       <div className="flex items-center justify-between mb-3 text-[11px] text-muted-foreground">
         <span className="font-mono">{fixture.group}</span>
         <span className="pill px-2 py-0.5 bg-muted">
-          {resolved ? '✅ Final' : voided ? '↩ Void · refunded' : locked ? '🔒 Kicked off' : `⏱ ${countdown(kickoffMs, now)}`}
+          {resolved ? '✅ Final' : voided ? '↩ Void · refunded' : !now ? '⏱ —' : locked ? '🔒 Kicked off' : `⏱ ${countdown(kickoffMs, now)}`}
         </span>
       </div>
 

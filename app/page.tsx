@@ -28,7 +28,9 @@ type Payouts = Record<string, bigint>;
 export default function Home() {
   const { address, isConnected } = useWallet();
 
-  const [now, setNow] = useState(() => Date.now());
+  // Starts at 0 so server and first client render match (no hydration
+  // mismatch); the clock effect sets the real time immediately on mount.
+  const [now, setNow] = useState(0);
   const [states, setStates] = useState<Record<string, MatchState | null>>({});
   const [stakes, setStakes] = useState<Stakes>({});
   const [payouts, setPayouts] = useState<Payouts>({});
@@ -63,8 +65,9 @@ export default function Home() {
     }
   }, []);
 
-  // Clock for countdowns.
+  // Clock for countdowns. Set the real time on mount, then tick every second.
   useEffect(() => {
+    setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
