@@ -1,10 +1,26 @@
 'use client';
 
+import { useState } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { fmtCrc, shortAddr } from '@/lib/format';
+import { CIRCLES_PLAYGROUND, appUrl } from '@/lib/host';
 
 export function Header({ balance }: { balance: bigint | null }) {
-  const { address, isConnected, connect, connecting, isMiniappHost } = useWallet();
+  const { address, isConnected, connect, connecting, isMiniappHost, connectError } =
+    useWallet();
+  const [dismissed, setDismissed] = useState<string | null>(null);
+  const showError = connectError && connectError !== dismissed;
+
+  // Inside the Circles host → run the passkey/Safe connect flow.
+  // Outside it (e.g. opened directly in a browser) → send the user into the
+  // Circles host with Golazo embedded, where connecting actually works.
+  function handleClick() {
+    if (isMiniappHost) {
+      void connect();
+    } else {
+      window.location.href = `${CIRCLES_PLAYGROUND}?url=${encodeURIComponent(appUrl())}`;
+    }
+  }
 
   return (
     <header className="sticky top-0 z-20 backdrop-blur-md bg-[oklch(0.21_0.04_158_/_0.75)] border-b border-border">
@@ -35,7 +51,7 @@ export function Header({ balance }: { balance: bigint | null }) {
           </div>
         ) : (
           <button
-            onClick={connect}
+            onClick={handleClick}
             disabled={connecting}
             className="pill bg-primary text-primary-foreground font-semibold text-sm px-4 py-2"
           >
@@ -43,6 +59,24 @@ export function Header({ balance }: { balance: bigint | null }) {
           </button>
         )}
       </div>
+
+      {showError && (
+        <div
+          role="alert"
+          className="mx-auto max-w-3xl px-4 pb-2 -mt-1"
+        >
+          <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/15 px-3 py-2 text-sm text-destructive-foreground">
+            <span className="flex-1">{connectError}</span>
+            <button
+              onClick={() => setDismissed(connectError)}
+              aria-label="Dismiss"
+              className="shrink-0 leading-none opacity-70 hover:opacity-100"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

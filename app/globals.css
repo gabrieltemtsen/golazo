@@ -13,6 +13,8 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-home: var(--home);
   --color-draw: var(--draw);
   --color-away: var(--away);
@@ -43,6 +45,9 @@
   --muted-foreground: oklch(0.74 0.03 152);
 
   --border: oklch(0.40 0.045 158);
+
+  --destructive: oklch(0.62 0.21 27);         /* alert red */
+  --destructive-foreground: oklch(0.97 0.01 150);
 
   --home: oklch(0.78 0.16 250);               /* blue */
   --draw: oklch(0.80 0.02 150);               /* grey */
