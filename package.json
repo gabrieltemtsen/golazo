@@ -1,0 +1,36 @@
+{
+  "name": "golazo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Golazo — parimutuel World Cup 2026 prediction pools, staked in Circles (CRC) on Gnosis Chain.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aboutcircles/miniapp-sdk": "^0.1.44",
+    "@aboutcircles/sdk": "^0.1.33",
+    "@aboutcircles/sdk-utils": "^0.1.33",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.451.0",
+    "next": "16.2.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "tailwind-merge": "^3.6.0",
+    "viem": "^2.38.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

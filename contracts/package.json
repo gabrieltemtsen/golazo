@@ -1,0 +1,32 @@
+{
+  "name": "golazo-contracts",
+  "version": "1.0.0",
+  "description": "Golazo — parimutuel World Cup prediction pools in Circles (CRC) on Gnosis Chain",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:gnosis": "hardhat run scripts/deploy.ts --network gnosis",
+    "deploy:chiado": "hardhat run scripts/deploy.ts --network chiado",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "open-matches": "hardhat run scripts/openMatches.ts --network gnosis",
+    "sign-result": "ts-node scripts/signResult.ts",
+    "node": "hardhat node",
+    "verify": "hardhat verify --network gnosis"
+  },
+  "overrides": {
+    "fp-ts": "^1.19.3"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "hardhat": "^2.22.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.12.0"
+  }
+}

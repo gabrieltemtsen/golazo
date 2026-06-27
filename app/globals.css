@@ -1,0 +1,135 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-pitch: var(--pitch);
+  --color-pitch-line: var(--pitch-line);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-gold: var(--gold);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-home: var(--home);
+  --color-draw: var(--draw);
+  --color-away: var(--away);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --radius-md: 0.7rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.4rem;
+}
+
+:root {
+  /* Stadium at night: deep pitch green, floodlight white, trophy gold. */
+  --background: oklch(0.21 0.04 158);
+  --foreground: oklch(0.97 0.01 150);
+
+  --card: oklch(0.27 0.045 158);
+  --card-foreground: oklch(0.97 0.01 150);
+
+  --pitch: oklch(0.45 0.12 150);
+  --pitch-line: oklch(0.92 0.02 150 / 0.5);
+
+  --primary: oklch(0.82 0.18 145);            /* bright grass */
+  --primary-foreground: oklch(0.18 0.03 158);
+
+  --gold: oklch(0.84 0.15 88);                /* trophy gold */
+
+  --muted: oklch(0.32 0.04 158);
+  --muted-foreground: oklch(0.74 0.03 152);
+
+  --border: oklch(0.40 0.045 158);
+
+  --home: oklch(0.78 0.16 250);               /* blue */
+  --draw: oklch(0.80 0.02 150);               /* grey */
+  --away: oklch(0.72 0.19 30);                /* red */
+
+  --radius: 1rem;
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, oklch(0.32 0.07 150 / 0.55), transparent 60%),
+    repeating-linear-gradient(
+      90deg,
+      oklch(0.205 0.04 158) 0 64px,
+      oklch(0.225 0.042 158) 64px 128px
+    );
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+/* Floodlit card */
+.card {
+  background: linear-gradient(180deg, var(--card), oklch(0.24 0.04 158));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 0 oklch(1 0 0 / 0.05) inset, 0 20px 40px -24px oklch(0 0 0 / 0.7);
+}
+
+.gold-text {
+  background: linear-gradient(180deg, oklch(0.92 0.12 92), oklch(0.78 0.16 78));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pill {
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 oklch(0.82 0.18 145 / 0.5); }
+  100% { box-shadow: 0 0 0 12px oklch(0.82 0.18 145 / 0); }
+}
+.live-dot {
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--muted);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.08), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Odds bar segments */
+.odds-track {
+  display: flex;
+  height: 0.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--muted);
+}
