@@ -82,11 +82,21 @@ export function MatchCard({
   const lost = resolved && !voided && hasBet && payout === 0n;
 
   return (
-    <div className="card p-4">
+    <div className="card p-4" style={hasBet ? { borderColor: 'var(--primary)' } : undefined}>
       {/* Status row */}
       <div className="flex items-center justify-between mb-3 text-[11px] text-muted-foreground">
-        <span className="font-mono">{fixture.group}</span>
-        <span className="pill px-2 py-0.5 bg-muted">
+        <span className="flex items-center gap-1.5 min-w-0">
+          <span className="font-mono truncate">{fixture.group}</span>
+          {hasBet && (
+            <span
+              className="pill px-1.5 py-0.5 text-[10px] font-semibold shrink-0"
+              style={{ background: 'color-mix(in oklch, var(--primary) 22%, transparent)', color: 'var(--primary)' }}
+            >
+              ✓ You&apos;re in
+            </span>
+          )}
+        </span>
+        <span className="pill px-2 py-0.5 bg-muted shrink-0">
           {resolved ? '✅ Final' : voided ? '↩ Void · refunded' : !now ? '⏱ —' : locked ? '🔒 Kicked off' : `⏱ ${countdown(kickoffMs, now)}`}
         </span>
       </div>

@@ -6,8 +6,9 @@ import { useWallet } from '@/components/wallet/WalletProvider';
 import { Header } from '@/components/golazo/Header';
 import { MatchCard } from '@/components/golazo/MatchCard';
 import { ReferralPanel } from '@/components/golazo/ReferralPanel';
+import { MyBets, type BetRow } from '@/components/golazo/MyBets';
 import { FIXTURES } from '@/lib/fixtures';
-import { isConfigured, type OutcomeId } from '@/lib/contracts';
+import { isConfigured, OUTCOME, type OutcomeId } from '@/lib/contracts';
 import {
   readMatch,
   readUserStake,
@@ -115,14 +116,18 @@ export default function Home() {
 
   async function handleStake(ref: string, outcome: OutcomeId, amount: string) {
     if (!address) return flash('info', 'Connect your wallet first.');
+    const fx = FIXTURES.find((f) => f.ref === ref);
+    const pick =
+      outcome === OUTCOME.HOME ? fx?.home.code : outcome === OUTCOME.AWAY ? fx?.away.code : 'Draw';
     setBusyRef(ref);
+    flash('info', `Confirm in your wallet — staking ${amount} CRC on ${pick}…`);
     try {
       const txs = await buildStakeTxs({ user: address, ref, outcome, amount, referrer });
       await send(txs);
-      flash('ok', `Backed ${amount} CRC. Good luck! ⚽`);
+      flash('ok', `✅ Stake confirmed — ${amount} CRC on ${pick}. See it in “Your bets”.`);
       await Promise.all([refreshPools(), refreshUser()]);
     } catch (e) {
-      flash('err', e instanceof Error ? e.message.slice(0, 90) : 'Stake failed.');
+      flash('err', e instanceof Error ? e.message.slice(0, 90) : 'Stake failed — nothing was charged.');
     } finally {
       setBusyRef(null);
     }
@@ -161,6 +166,14 @@ export default function Home() {
   });
   const settled = FIXTURES.filter((f) => states[f.ref]?.status === 'Resolved' || states[f.ref]?.status === 'Voided');
 
+  // Everything the connected user has staked, for the "Your bets" panel.
+  const betRows: BetRow[] = FIXTURES.map((f) => ({
+    fixture: f,
+    state: states[f.ref] ?? null,
+    stake: stakes[f.ref] ?? { home: 0n, draw: 0n, away: 0n },
+    payout: payouts[f.ref] ?? 0n,
+  })).filter((r) => r.stake.home + r.stake.draw + r.stake.away > 0n);
+
   return (
     <div className="min-h-full pb-24">
       <Header balance={balance} />
@@ -191,32 +204,52 @@ export default function Home() {
         </div>
       )}
 
-      {/* Referral */}
+      {/* How it works — compact, up top so first-timers get oriented without scrolling */}
       <section className="mx-auto max-w-3xl px-4 mt-3">
-        <ReferralPanel stats={referral} busy={busyRef === '__ref__'} onClaim={handleClaimReferral} />
+        <div className="grid grid-cols-3 gap-2">
+          <HowStep n="1" title="Pick a result" desc="Home · Draw · Away" />
+          <HowStep n="2" title="Stake CRC" desc="One tap, one signature" />
+          <HowStep n="3" title="Winners split the pot" desc="Paid out in CRC" />
+        </div>
       </section>
+
+      {/* Your bets — single place that answers "where are my stakes?" */}
+      {isConnected && betRows.length > 0 && (
+        <section className="mx-auto max-w-3xl px-4 mt-3">
+          <MyBets rows={betRows} now={now} />
+        </section>
+      )}
 
       {/* Live matches */}
       <section className="mx-auto max-w-3xl px-4 mt-5">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-2">
           <span className="live-dot h-2 w-2 rounded-full bg-primary" /> Open pools
+          <span className="font-normal normal-case tracking-normal">— tap a result to back it</span>
         </h2>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {live.map((f) => (
-            <MatchCard
-              key={f.ref}
-              fixture={f}
-              state={states[f.ref] ?? null}
-              userStake={stakes[f.ref] ?? { home: 0n, draw: 0n, away: 0n }}
-              payout={payouts[f.ref] ?? 0n}
-              now={now}
-              connected={isConnected}
-              busyRef={busyRef}
-              onStake={handleStake}
-              onClaim={handleClaim}
-            />
-          ))}
-        </div>
+        {live.length === 0 ? (
+          <div className="card p-5 text-center text-sm text-muted-foreground">
+            No open pools right now — kickoffs have passed. Check <strong>Results</strong> below, or
+            come back when the next round&apos;s fixtures are set.
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 gap-3">
+            {live.map((f) => (
+              <div id={`match-${f.ref}`} key={f.ref} className="scroll-mt-20">
+                <MatchCard
+                  fixture={f}
+                  state={states[f.ref] ?? null}
+                  userStake={stakes[f.ref] ?? { home: 0n, draw: 0n, away: 0n }}
+                  payout={payouts[f.ref] ?? 0n}
+                  now={now}
+                  connected={isConnected}
+                  busyRef={busyRef}
+                  onStake={handleStake}
+                  onClaim={handleClaim}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Settled */}
@@ -225,33 +258,38 @@ export default function Home() {
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Results</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {settled.map((f) => (
-              <MatchCard
-                key={f.ref}
-                fixture={f}
-                state={states[f.ref] ?? null}
-                userStake={stakes[f.ref] ?? { home: 0n, draw: 0n, away: 0n }}
-                payout={payouts[f.ref] ?? 0n}
-                now={now}
-                connected={isConnected}
-                busyRef={busyRef}
-                onStake={handleStake}
-                onClaim={handleClaim}
-              />
+              <div id={`match-${f.ref}`} key={f.ref} className="scroll-mt-20">
+                <MatchCard
+                  fixture={f}
+                  state={states[f.ref] ?? null}
+                  userStake={stakes[f.ref] ?? { home: 0n, draw: 0n, away: 0n }}
+                  payout={payouts[f.ref] ?? 0n}
+                  now={now}
+                  connected={isConnected}
+                  busyRef={busyRef}
+                  onStake={handleStake}
+                  onClaim={handleClaim}
+                />
+              </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* How it works */}
-      <section className="mx-auto max-w-3xl px-4 mt-8">
+      {/* Referral — surfaced after the user understands the game */}
+      <section className="mx-auto max-w-3xl px-4 mt-6">
+        <ReferralPanel stats={referral} busy={busyRef === '__ref__'} onClaim={handleClaimReferral} />
+      </section>
+
+      {/* Why it's fair — the detail, on demand */}
+      <section className="mx-auto max-w-3xl px-4 mt-6">
         <div className="card p-4">
-          <h2 className="font-bold mb-2">How Golazo works</h2>
+          <h2 className="font-bold mb-2">Why it&apos;s fair</h2>
           <ol className="text-sm text-muted-foreground space-y-1.5 list-decimal list-inside">
-            <li>Pick a match and back <strong>Home</strong>, <strong>Draw</strong> or <strong>Away</strong> with CRC.</li>
-            <li>Everyone&apos;s stake flows into one pool. The live bar is the crowd&apos;s real-time odds.</li>
-            <li>The oracle posts the final result on-chain (cryptographically signed — no one can fake it).</li>
+            <li>No bookie, no house — every stake flows into one shared pool.</li>
+            <li>The live bar is the crowd&apos;s real-time odds; back the underdog for a bigger slice.</li>
+            <li>The result is posted on-chain, cryptographically signed — no one can fake it.</li>
             <li>Backers of the winning result split the whole pool, pro-rata to their stake.</li>
-            <li>Invite friends: an invite that lands a new wallet pays you an instant CRC bounty.</li>
           </ol>
         </div>
       </section>
@@ -276,6 +314,18 @@ export default function Home() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function HowStep({ n, title, desc }: { n: string; title: string; desc: string }) {
+  return (
+    <div className="card p-3 text-center">
+      <div className="mx-auto mb-1.5 grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+        {n}
+      </div>
+      <div className="text-xs font-semibold leading-tight">{title}</div>
+      <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{desc}</div>
     </div>
   );
 }
