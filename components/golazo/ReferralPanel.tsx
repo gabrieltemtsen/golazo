@@ -53,11 +53,22 @@ export function ReferralPanel({
         <h2 className="font-bold">Invite friends, earn on-chain</h2>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
-        When your invite lands a <strong>brand-new Circles wallet</strong> that places its first
-        stake, you instantly earn a{' '}
-        <span className="text-gold font-semibold font-mono">{fmtCrc(stats.bounty)} CRC</span> bounty —
-        paid by the contract, no claim form. You also keep a slice of the rake every time a friend
-        you brought in wins.
+        {stats.bounty > 0n ? (
+          <>
+            When your invite lands a <strong>brand-new Circles wallet</strong> that places its first
+            stake, you instantly earn a{' '}
+            <span className="text-gold font-semibold font-mono">{fmtCrc(stats.bounty)} CRC</span>{' '}
+            bounty — paid by the contract, no claim form. You also keep a slice of the rake every
+            time a friend you brought in wins.
+          </>
+        ) : (
+          <>
+            Every invite that lands a <strong>brand-new Circles wallet</strong> placing its first
+            stake is recorded on-chain — and you keep a{' '}
+            <span className="text-gold font-semibold">slice of the rake</span> every time a friend
+            you brought in wins, paid straight by the contract.
+          </>
+        )}
       </p>
 
       {isConnected ? (
