@@ -71,10 +71,15 @@ export function MatchCard({
     [OUTCOME.AWAY]: 'var(--away)',
   };
 
-  const myOutcome: OutcomeId | null =
-    userStake.home > 0n ? OUTCOME.HOME : userStake.draw > 0n ? OUTCOME.DRAW : userStake.away > 0n ? OUTCOME.AWAY : null;
-  const won = resolved && state && myOutcome === state.result && payout > 0n;
-  const lost = resolved && state && myOutcome !== null && myOutcome !== state.result;
+  // A user can back multiple outcomes (e.g. seeding both sides). Show them all.
+  const myStakes = ([OUTCOME.HOME, OUTCOME.DRAW, OUTCOME.AWAY] as OutcomeId[])
+    .map((o) => ({
+      o,
+      amt: o === OUTCOME.HOME ? userStake.home : o === OUTCOME.DRAW ? userStake.draw : userStake.away,
+    }))
+    .filter((s) => s.amt > 0n);
+  const won = resolved && payout > 0n; // previewPayout > 0 ⇒ backed the winning side
+  const lost = resolved && !voided && hasBet && payout === 0n;
 
   return (
     <div className="card p-4">
@@ -183,10 +188,10 @@ export function MatchCard({
       {/* Your position */}
       {hasBet && (
         <div className="mt-3 rounded-md bg-muted/60 p-2.5 text-xs">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Your stake</span>
-            <span className="font-mono">
-              {myOutcome !== null ? `${fmtCrc(totals[myOutcome] === 0n ? 0n : myTotal)} CRC on ${outcomeLabels[myOutcome]}` : ''}
+          <div className="flex justify-between gap-2">
+            <span className="text-muted-foreground">{myStakes.length > 1 ? 'Your stakes' : 'Your stake'}</span>
+            <span className="font-mono text-right">
+              {myStakes.map((s) => `${fmtCrc(s.amt)} ${outcomeLabels[s.o]}`).join(' · ')} CRC
             </span>
           </div>
           {resolved && (
