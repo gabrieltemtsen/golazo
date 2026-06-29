@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import type { Fixture } from '@/lib/fixtures';
 import type { MatchState } from '@/lib/golazo';
 import { OUTCOME, type OutcomeId } from '@/lib/contracts';
-import { fmtCrc, impliedPct, decimalOdds, countdown } from '@/lib/format';
+import { fmtCrc, impliedPct, decimalOdds, countdown, CRC_DECIMALS } from '@/lib/format';
+import { formatUnits } from 'viem';
 
 type UserStake = { home: bigint; draw: bigint; away: bigint };
 
@@ -15,6 +16,7 @@ type Props = {
   payout: bigint;
   now: number;
   connected: boolean;
+  balance: bigint | null;
   busyRef: string | null;
   onStake: (ref: string, outcome: OutcomeId, amount: string) => void;
   onClaim: (ref: string) => void;
@@ -29,6 +31,7 @@ export function MatchCard({
   payout,
   now,
   connected,
+  balance,
   busyRef,
   onStake,
   onClaim,
@@ -57,6 +60,10 @@ export function MatchCard({
   const myTotal = userStake.home + userStake.draw + userStake.away;
   const hasBet = myTotal > 0n;
   const busy = busyRef === fixture.ref;
+
+  // Gate the stake button when the entered amount exceeds the user's CRC.
+  const balanceNum = balance == null ? null : Number(formatUnits(balance, CRC_DECIMALS));
+  const notEnough = connected && balanceNum != null && Number(amount || 0) > balanceNum;
 
   const outcomeLabels: Record<OutcomeId, string> = {
     [OUTCOME.NONE]: '',
@@ -180,7 +187,7 @@ export function MatchCard({
           </div>
 
           <button
-            disabled={!connected || pick === null || !amount || Number(amount) <= 0 || busy}
+            disabled={!connected || pick === null || !amount || Number(amount) <= 0 || notEnough || busy}
             onClick={() => pick !== null && onStake(fixture.ref, pick, amount)}
             className="w-full mt-2 pill bg-primary text-primary-foreground font-bold py-2.5 disabled:opacity-50"
           >
@@ -190,6 +197,8 @@ export function MatchCard({
               ? 'Connect to back a result'
               : pick === null
               ? 'Pick a result'
+              : notEnough
+              ? `Not enough CRC · you have ${fmtCrc(balance ?? 0n)}`
               : `Back ${outcomeLabels[pick]} · win ~${(decimalOdds(totals[pick], pool) * Number(amount || 0)).toFixed(1)} CRC`}
           </button>
         </>

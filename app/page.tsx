@@ -9,6 +9,9 @@ import { ReferralPanel } from '@/components/golazo/ReferralPanel';
 import { MyBets, type BetRow } from '@/components/golazo/MyBets';
 import { FIXTURES } from '@/lib/fixtures';
 import { isConfigured, OUTCOME, type OutcomeId } from '@/lib/contracts';
+import { friendlyError } from '@/lib/errors';
+import { fmtCrc, CRC_DECIMALS } from '@/lib/format';
+import { parseUnits } from 'viem';
 import {
   readMatch,
   readUserStake,
@@ -115,10 +118,27 @@ export default function Home() {
   }, [refreshUser]);
 
   async function handleStake(ref: string, outcome: OutcomeId, amount: string) {
-    if (!address) return flash('info', 'Connect your wallet first.');
+    if (!address) return flash('info', 'Connect your wallet first to back a result.');
+
     const fx = FIXTURES.find((f) => f.ref === ref);
     const pick =
       outcome === OUTCOME.HOME ? fx?.home.code : outcome === OUTCOME.AWAY ? fx?.away.code : 'Draw';
+
+    // Validate the amount and catch "not enough CRC" before sending anything.
+    let amountWei: bigint;
+    try {
+      amountWei = parseUnits(amount, CRC_DECIMALS);
+    } catch {
+      return flash('err', 'Enter a valid amount, e.g. 5.');
+    }
+    if (amountWei <= 0n) return flash('err', 'Enter an amount greater than zero.');
+    if (balance !== null && amountWei > balance) {
+      return flash(
+        'err',
+        `Not enough CRC — you have ${fmtCrc(balance)}, this stake needs ${amount}. Lower it or top up.`
+      );
+    }
+
     setBusyRef(ref);
     flash('info', `Confirm in your wallet — staking ${amount} CRC on ${pick}…`);
     try {
@@ -127,7 +147,7 @@ export default function Home() {
       flash('ok', `✅ Stake confirmed — ${amount} CRC on ${pick}. See it in “Your bets”.`);
       await Promise.all([refreshPools(), refreshUser()]);
     } catch (e) {
-      flash('err', e instanceof Error ? e.message.slice(0, 90) : 'Stake failed — nothing was charged.');
+      flash('err', friendlyError(e, 'stake'));
     } finally {
       setBusyRef(null);
     }
@@ -137,10 +157,10 @@ export default function Home() {
     setBusyRef(ref);
     try {
       await send([buildClaimTx(ref)]);
-      flash('ok', 'Winnings claimed 🏆');
+      flash('ok', 'Claimed 🏆 — CRC is on its way to your wallet.');
       await Promise.all([refreshPools(), refreshUser()]);
     } catch (e) {
-      flash('err', e instanceof Error ? e.message.slice(0, 90) : 'Claim failed.');
+      flash('err', friendlyError(e, 'claim'));
     } finally {
       setBusyRef(null);
     }
@@ -153,7 +173,7 @@ export default function Home() {
       flash('ok', 'Referral earnings withdrawn 🎁');
       await refreshUser();
     } catch (e) {
-      flash('err', e instanceof Error ? e.message.slice(0, 90) : 'Claim failed.');
+      flash('err', friendlyError(e, 'claim'));
     } finally {
       setBusyRef(null);
     }
@@ -242,6 +262,7 @@ export default function Home() {
                   payout={payouts[f.ref] ?? 0n}
                   now={now}
                   connected={isConnected}
+                  balance={balance}
                   busyRef={busyRef}
                   onStake={handleStake}
                   onClaim={handleClaim}
@@ -266,6 +287,7 @@ export default function Home() {
                   payout={payouts[f.ref] ?? 0n}
                   now={now}
                   connected={isConnected}
+                  balance={balance}
                   busyRef={busyRef}
                   onStake={handleStake}
                   onClaim={handleClaim}
