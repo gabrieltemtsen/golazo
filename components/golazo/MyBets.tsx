@@ -10,6 +10,7 @@ export type BetRow = {
   state: MatchState | null;
   stake: { home: bigint; draw: bigint; away: bigint };
   payout: bigint;
+  claimed: boolean;
 };
 
 /**
@@ -21,7 +22,9 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
 
   const total = rows.reduce((a, r) => a + r.stake.home + r.stake.draw + r.stake.away, 0n);
   const claimable = rows.reduce(
-    (a, r) => a + ((r.state?.status === 'Resolved' || r.state?.status === 'Voided') ? r.payout : 0n),
+    (a, r) =>
+      a +
+      ((r.state?.status === 'Resolved' || r.state?.status === 'Voided') && !r.claimed ? r.payout : 0n),
     0n
   );
 
@@ -56,11 +59,16 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
           let chipText = 'Open';
           let chipColor = 'var(--primary)';
           if (status === 'Resolved') {
-            chipText = r.payout > 0n ? `Won +${fmtCrc(r.payout)}` : 'No win';
-            chipColor = r.payout > 0n ? 'var(--gold)' : 'var(--muted-foreground)';
+            if (r.claimed) {
+              chipText = r.payout > 0n ? `Claimed +${fmtCrc(r.payout)}` : 'No win';
+              chipColor = 'var(--muted-foreground)';
+            } else {
+              chipText = r.payout > 0n ? `Won +${fmtCrc(r.payout)}` : 'No win';
+              chipColor = r.payout > 0n ? 'var(--gold)' : 'var(--muted-foreground)';
+            }
           } else if (status === 'Voided') {
-            chipText = `Refund ${fmtCrc(r.payout)}`;
-            chipColor = 'var(--draw)';
+            chipText = r.claimed ? 'Refunded ✓' : `Refund ${fmtCrc(r.payout)}`;
+            chipColor = r.claimed ? 'var(--muted-foreground)' : 'var(--draw)';
           } else if (locked) {
             chipText = 'Locked';
             chipColor = 'var(--muted-foreground)';

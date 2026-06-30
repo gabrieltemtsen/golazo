@@ -83,6 +83,20 @@ export async function readUserStake(
   }
 }
 
+export async function readClaimed(ref: string, user: Address): Promise<boolean> {
+  if (!isConfigured()) return false;
+  try {
+    return (await publicClient.readContract({
+      address: GOLAZO_POOL,
+      abi: GOLAZO_ABI,
+      functionName: 'claimed',
+      args: [matchIdOf(ref), user],
+    })) as boolean;
+  } catch {
+    return false;
+  }
+}
+
 export async function previewPayout(ref: string, user: Address): Promise<bigint> {
   if (!isConfigured()) return 0n;
   try {

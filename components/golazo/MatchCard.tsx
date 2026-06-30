@@ -14,6 +14,7 @@ type Props = {
   state: MatchState | null;
   userStake: UserStake;
   payout: bigint;
+  claimed: boolean;
   now: number;
   connected: boolean;
   balance: bigint | null;
@@ -29,6 +30,7 @@ export function MatchCard({
   state,
   userStake,
   payout,
+  claimed,
   now,
   connected,
   balance,
@@ -221,15 +223,21 @@ export function MatchCard({
               </span>
             </div>
           )}
-          {(won || voided) && payout > 0n && (
-            <button
-              disabled={busy}
-              onClick={() => onClaim(fixture.ref)}
-              className="w-full mt-2 pill font-bold py-2 text-primary-foreground"
-              style={{ background: 'var(--gold)' }}
-            >
-              {busy ? 'Claiming…' : voided ? `Claim refund · ${fmtCrc(payout)} CRC` : `Claim winnings · ${fmtCrc(payout)} CRC`}
-            </button>
+          {claimed && (won || voided) ? (
+            <div className="w-full mt-2 pill font-semibold py-2 text-center bg-muted text-muted-foreground">
+              ✓ {voided ? 'Refunded' : 'Claimed'}{payout > 0n ? ` · ${fmtCrc(payout)} CRC` : ''}
+            </div>
+          ) : (
+            (won || voided) && payout > 0n && (
+              <button
+                disabled={busy}
+                onClick={() => onClaim(fixture.ref)}
+                className="w-full mt-2 pill font-bold py-2 text-primary-foreground"
+                style={{ background: 'var(--gold)' }}
+              >
+                {busy ? 'Claiming…' : voided ? `Claim refund · ${fmtCrc(payout)} CRC` : `Claim winnings · ${fmtCrc(payout)} CRC`}
+              </button>
+            )
           )}
         </div>
       )}

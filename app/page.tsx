@@ -15,6 +15,7 @@ import { parseUnits } from 'viem';
 import {
   readMatch,
   readUserStake,
+  readClaimed,
   previewPayout,
   readReferralStats,
   readCrcBalance,
@@ -28,6 +29,7 @@ import {
 
 type Stakes = Record<string, { home: bigint; draw: bigint; away: bigint }>;
 type Payouts = Record<string, bigint>;
+type Claims = Record<string, boolean>;
 
 export default function Home() {
   const { address, isConnected } = useWallet();
@@ -38,6 +40,7 @@ export default function Home() {
   const [states, setStates] = useState<Record<string, MatchState | null>>({});
   const [stakes, setStakes] = useState<Stakes>({});
   const [payouts, setPayouts] = useState<Payouts>({});
+  const [claims, setClaims] = useState<Claims>({});
   const [referral, setReferral] = useState<ReferralStats>({ count: 0n, credits: 0n, bounty: 0n });
   const [balance, setBalance] = useState<bigint | null>(null);
   const [referrer, setReferrer] = useState<Address | null>(null);
@@ -89,18 +92,21 @@ export default function Home() {
     if (!address) {
       setStakes({});
       setPayouts({});
+      setClaims({});
       setReferral({ count: 0n, credits: 0n, bounty: 0n });
       setBalance(null);
       return;
     }
-    const [stk, pay, ref, bal] = await Promise.all([
+    const [stk, pay, clm, ref, bal] = await Promise.all([
       Promise.all(FIXTURES.map(async (f) => [f.ref, await readUserStake(f.ref, address)] as const)),
       Promise.all(FIXTURES.map(async (f) => [f.ref, await previewPayout(f.ref, address)] as const)),
+      Promise.all(FIXTURES.map(async (f) => [f.ref, await readClaimed(f.ref, address)] as const)),
       readReferralStats(address),
       readCrcBalance(address),
     ]);
     setStakes(Object.fromEntries(stk));
     setPayouts(Object.fromEntries(pay));
+    setClaims(Object.fromEntries(clm));
     setReferral(ref);
     setBalance(bal);
   }, [address]);
@@ -192,6 +198,7 @@ export default function Home() {
     state: states[f.ref] ?? null,
     stake: stakes[f.ref] ?? { home: 0n, draw: 0n, away: 0n },
     payout: payouts[f.ref] ?? 0n,
+    claimed: claims[f.ref] ?? false,
   })).filter((r) => r.stake.home + r.stake.draw + r.stake.away > 0n);
 
   return (
@@ -260,6 +267,7 @@ export default function Home() {
                   state={states[f.ref] ?? null}
                   userStake={stakes[f.ref] ?? { home: 0n, draw: 0n, away: 0n }}
                   payout={payouts[f.ref] ?? 0n}
+                  claimed={claims[f.ref] ?? false}
                   now={now}
                   connected={isConnected}
                   balance={balance}
@@ -285,6 +293,7 @@ export default function Home() {
                   state={states[f.ref] ?? null}
                   userStake={stakes[f.ref] ?? { home: 0n, draw: 0n, away: 0n }}
                   payout={payouts[f.ref] ?? 0n}
+                  claimed={claims[f.ref] ?? false}
                   now={now}
                   connected={isConnected}
                   balance={balance}

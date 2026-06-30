@@ -103,6 +103,16 @@ export const GOLAZO_ABI = [
   },
   {
     type: 'function',
+    name: 'claimed',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'matchId', type: 'bytes32' },
+      { name: 'user', type: 'address' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+  {
+    type: 'function',
     name: 'stake',
     stateMutability: 'nonpayable',
     inputs: [
