@@ -12,6 +12,7 @@ const OG_DESC =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  icons: { icon: '/icon.png', apple: '/icon.png' },
   title: 'Golazo — World Cup prediction pools on Circles',
   description:
     'Stake your Circles (CRC) on the World Cup 2026 knockouts. No house, no fixed odds — every pool is split among the crowd that called it right. Invite a friend, earn an on-chain bounty when they join.',
