@@ -8,7 +8,7 @@ import { MatchCard } from '@/components/golazo/MatchCard';
 import { ReferralPanel } from '@/components/golazo/ReferralPanel';
 import { MyBets, type BetRow } from '@/components/golazo/MyBets';
 import { FIXTURES } from '@/lib/fixtures';
-import { isConfigured, OUTCOME, type OutcomeId } from '@/lib/contracts';
+import { isConfigured, OUTCOME, HOST_AVATAR, type OutcomeId } from '@/lib/contracts';
 import { friendlyError } from '@/lib/errors';
 import { fmtCrc, CRC_DECIMALS } from '@/lib/format';
 import { parseUnits } from 'viem';
@@ -22,6 +22,7 @@ import {
   buildStakeTxs,
   buildClaimTx,
   buildClaimReferralTx,
+  buildTrustTx,
   send,
   type MatchState,
   type ReferralStats,
@@ -45,6 +46,8 @@ export default function Home() {
   const [balance, setBalance] = useState<bigint | null>(null);
   const [referrer, setReferrer] = useState<Address | null>(null);
   const [busyRef, setBusyRef] = useState<string | null>(null);
+  const [showTrust, setShowTrust] = useState(false);
+  const [trusting, setTrusting] = useState(false);
   const [toast, setToast] = useState<{ kind: 'ok' | 'err' | 'info'; msg: string } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -165,11 +168,53 @@ export default function Home() {
       await send([buildClaimTx(ref)]);
       flash('ok', 'Claimed 🏆 — CRC is on its way to your wallet.');
       await Promise.all([refreshPools(), refreshUser()]);
+      maybePromptTrust();
     } catch (e) {
       flash('err', friendlyError(e, 'claim'));
     } finally {
       setBusyRef(null);
     }
+  }
+
+  // Optional, non-blocking nudge after a happy moment (a claim): invite the
+  // user to trust Golazo's creator on Circles, growing the trust graph.
+  // Skipped if the user is the creator, already trusted, or dismissed before.
+  function maybePromptTrust() {
+    if (!address) return;
+    if (address.toLowerCase() === HOST_AVATAR.toLowerCase()) return;
+    try {
+      if (window.localStorage.getItem('golazo_trust') === 'done') return;
+    } catch {
+      /* ignore */
+    }
+    setShowTrust(true);
+  }
+
+  async function handleTrust() {
+    setTrusting(true);
+    try {
+      await send([buildTrustTx(HOST_AVATAR)]);
+      flash('ok', '🤝 Thanks for the trust — you’re part of the Golazo circle now!');
+      try {
+        window.localStorage.setItem('golazo_trust', 'done');
+      } catch {
+        /* ignore */
+      }
+      setShowTrust(false);
+    } catch (e) {
+      flash('err', friendlyError(e, 'claim'));
+    } finally {
+      setTrusting(false);
+    }
+  }
+
+  function dismissTrust() {
+    try {
+      window.localStorage.setItem('golazo_trust', 'done');
+    } catch {
+      /* ignore */
+    }
+    setShowTrust(false);
   }
 
   async function handleClaimReferral() {
@@ -329,6 +374,35 @@ export default function Home() {
         Built on Circles · Gnosis Chain · parimutuel pools, settled in CRC. Predictions are for fun —
         only stake what you can afford.
       </footer>
+
+      {/* Trust nudge — optional, appears after a claim */}
+      {showTrust && (
+        <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/50 px-4 pb-6 sm:pb-0">
+          <div className="card p-5 max-w-sm w-full text-center" style={{ borderColor: 'var(--primary)' }}>
+            <div className="text-3xl mb-1" aria-hidden>🤝</div>
+            <h3 className="font-bold text-lg">Grow the Golazo circle</h3>
+            <p className="text-sm text-muted-foreground mt-1.5">
+              Enjoying Golazo? Trust the creator on Circles. It strengthens the trust graph that
+              powers these pools — and it&apos;s completely optional.
+            </p>
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                onClick={handleTrust}
+                disabled={trusting}
+                className="pill bg-primary text-primary-foreground font-bold py-2.5 disabled:opacity-50"
+              >
+                {trusting ? 'Confirm in your wallet…' : 'Trust the creator 🤝'}
+              </button>
+              <button
+                onClick={dismissTrust}
+                className="pill bg-muted py-2 text-sm text-muted-foreground"
+              >
+                Maybe later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       {toast && (

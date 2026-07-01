@@ -16,8 +16,11 @@ import {
   publicClient,
   GOLAZO_POOL,
   CRC_TOKEN,
+  CIRCLES_HUB,
+  TRUST_EXPIRY_MAX,
   GOLAZO_ABI,
   ERC20_ABI,
+  HUB_ABI,
   matchIdOf,
   isConfigured,
   type OutcomeId,
@@ -227,6 +230,19 @@ export function buildClaimTx(ref: string): Tx {
       abi: GOLAZO_ABI,
       functionName: 'claim',
       args: [matchIdOf(ref)],
+    }),
+    value: '0',
+  };
+}
+
+/** Build a Circles Hub trust() tx: msg.sender trusts `trustee` indefinitely. */
+export function buildTrustTx(trustee: Address): Tx {
+  return {
+    to: CIRCLES_HUB,
+    data: encodeFunctionData({
+      abi: HUB_ABI,
+      functionName: 'trust',
+      args: [trustee, TRUST_EXPIRY_MAX],
     }),
     value: '0',
   };

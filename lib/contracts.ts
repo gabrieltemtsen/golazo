@@ -14,6 +14,17 @@ export const GOLAZO_POOL = (process.env.NEXT_PUBLIC_GOLAZO_POOL ??
 export const CRC_TOKEN = (process.env.NEXT_PUBLIC_CRC_TOKEN ??
   '0x0000000000000000000000000000000000000000') as Address;
 
+/** Circles v2 Hub — used for the optional "trust the creator" nudge. */
+export const CIRCLES_HUB = (process.env.NEXT_PUBLIC_CIRCLES_HUB ??
+  '0xc12C1E50ABB450d6205Ea2C3Fa861b3B834d13e8') as Address;
+
+/** The avatar users are invited to trust (Golazo's creator). Set via env. */
+export const HOST_AVATAR = (process.env.NEXT_PUBLIC_HOST_AVATAR ??
+  '0x5824cc598EeC4c1e006F83Ee8BE9BA981e983F0e') as Address;
+
+/** uint96 max = trust with no expiry (indefinite). */
+export const TRUST_EXPIRY_MAX = 2n ** 96n - 1n;
+
 export const isConfigured = () =>
   GOLAZO_POOL !== '0x0000000000000000000000000000000000000000';
 
@@ -145,6 +156,19 @@ export const GOLAZO_ABI = [
       { name: 'newWallet', type: 'address', indexed: true },
       { name: 'bounty', type: 'uint256', indexed: false },
     ],
+  },
+] as const;
+
+export const HUB_ABI = [
+  {
+    type: 'function',
+    name: 'trust',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: '_trustReceiver', type: 'address' },
+      { name: '_expiry', type: 'uint96' },
+    ],
+    outputs: [],
   },
 ] as const;
 
