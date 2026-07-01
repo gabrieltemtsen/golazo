@@ -48,6 +48,7 @@ export default function Home() {
   const [busyRef, setBusyRef] = useState<string | null>(null);
   const [showTrust, setShowTrust] = useState(false);
   const [trusting, setTrusting] = useState(false);
+  const [trusted, setTrusted] = useState(false);
   const [toast, setToast] = useState<{ kind: 'ok' | 'err' | 'info'; msg: string } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -72,6 +73,15 @@ export default function Home() {
       }
     } catch {
       /* no-op */
+    }
+  }, []);
+
+  // Restore "trusted the creator" state for returning users.
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem('golazo_trust') === 'trusted') setTrusted(true);
+    } catch {
+      /* ignore */
     }
   }, []);
 
@@ -183,7 +193,8 @@ export default function Home() {
     if (!address) return;
     if (address.toLowerCase() === HOST_AVATAR.toLowerCase()) return;
     try {
-      if (window.localStorage.getItem('golazo_trust') === 'done') return;
+      // Skip if already trusted or previously dismissed.
+      if (window.localStorage.getItem('golazo_trust')) return;
     } catch {
       /* ignore */
     }
@@ -196,10 +207,11 @@ export default function Home() {
       await send([buildTrustTx(HOST_AVATAR)]);
       flash('ok', '🤝 Thanks for the trust — you’re part of the Golazo circle now!');
       try {
-        window.localStorage.setItem('golazo_trust', 'done');
+        window.localStorage.setItem('golazo_trust', 'trusted');
       } catch {
         /* ignore */
       }
+      setTrusted(true);
       setShowTrust(false);
     } catch (e) {
       flash('err', friendlyError(e, 'claim'));
@@ -210,7 +222,7 @@ export default function Home() {
 
   function dismissTrust() {
     try {
-      window.localStorage.setItem('golazo_trust', 'done');
+      window.localStorage.setItem('golazo_trust', 'dismissed');
     } catch {
       /* ignore */
     }
@@ -354,7 +366,7 @@ export default function Home() {
 
       {/* Referral — surfaced after the user understands the game */}
       <section className="mx-auto max-w-3xl px-4 mt-6">
-        <ReferralPanel stats={referral} busy={busyRef === '__ref__'} onClaim={handleClaimReferral} />
+        <ReferralPanel stats={referral} busy={busyRef === '__ref__'} onClaim={handleClaimReferral} trusted={trusted} />
       </section>
 
       {/* Why it's fair — the detail, on demand */}

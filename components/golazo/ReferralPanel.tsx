@@ -11,10 +11,12 @@ export function ReferralPanel({
   stats,
   busy,
   onClaim,
+  trusted = false,
 }: {
   stats: ReferralStats;
   busy: boolean;
   onClaim: () => void;
+  trusted?: boolean;
 }) {
   const { address, isConnected } = useWallet();
   const [copied, setCopied] = useState(false);
@@ -51,6 +53,14 @@ export function ReferralPanel({
       <div className="flex items-center gap-2 mb-1">
         <Gift size={16} className="text-gold" />
         <h2 className="font-bold">Invite friends, earn on-chain</h2>
+        {trusted && (
+          <span
+            className="ml-auto pill px-2 py-0.5 text-[10px] font-semibold shrink-0"
+            style={{ background: 'color-mix(in oklch, var(--primary) 22%, transparent)', color: 'var(--primary)' }}
+          >
+            🤝 You trust the creator
+          </span>
+        )}
       </div>
       <p className="text-xs text-muted-foreground mb-3">
         {stats.bounty > 0n ? (
