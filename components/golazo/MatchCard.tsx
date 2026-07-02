@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import type { Fixture } from '@/lib/fixtures';
 import type { MatchState } from '@/lib/golazo';
 import { OUTCOME, type OutcomeId } from '@/lib/contracts';
-import { fmtCrc, impliedPct, decimalOdds, countdown, CRC_DECIMALS } from '@/lib/format';
+import { impliedPct, decimalOdds, countdown, CRC_DECIMALS } from '@/lib/format';
+import { fmtDem, toDemurraged } from '@/lib/demurrage';
 import { formatUnits } from 'viem';
 
 type UserStake = { home: bigint; draw: bigint; away: bigint };
@@ -63,8 +64,10 @@ export function MatchCard({
   const hasBet = myTotal > 0n;
   const busy = busyRef === fixture.ref;
 
-  // Gate the stake button when the entered amount exceeds the user's CRC.
-  const balanceNum = balance == null ? null : Number(formatUnits(balance, CRC_DECIMALS));
+  // Gate the stake button when the entered (demurraged) amount exceeds the
+  // user's demurraged balance. `balance` is static, so convert it first.
+  const balanceNum =
+    balance == null ? null : Number(formatUnits(toDemurraged(balance), CRC_DECIMALS));
   const notEnough = connected && balanceNum != null && Number(amount || 0) > balanceNum;
 
   const outcomeLabels: Record<OutcomeId, string> = {
@@ -200,7 +203,7 @@ export function MatchCard({
               : pick === null
               ? 'Pick a result'
               : notEnough
-              ? `Not enough CRC · you have ${fmtCrc(balance ?? 0n)}`
+              ? `Not enough gCRC · you have ${fmtDem(balance ?? 0n)}`
               : `Back ${outcomeLabels[pick]} · win ~${(decimalOdds(totals[pick], pool) * Number(amount || 0)).toFixed(1)} CRC`}
           </button>
         </>
@@ -212,20 +215,20 @@ export function MatchCard({
           <div className="flex justify-between gap-2">
             <span className="text-muted-foreground">{myStakes.length > 1 ? 'Your stakes' : 'Your stake'}</span>
             <span className="font-mono text-right">
-              {myStakes.map((s) => `${fmtCrc(s.amt)} ${outcomeLabels[s.o]}`).join(' · ')} CRC
+              {myStakes.map((s) => `${fmtDem(s.amt)} ${outcomeLabels[s.o]}`).join(' · ')} CRC
             </span>
           </div>
           {resolved && (
             <div className="flex justify-between mt-1">
               <span className="text-muted-foreground">{won ? '🏆 You called it' : lost ? 'Result' : 'Payout'}</span>
               <span className="font-mono font-semibold" style={{ color: won ? 'var(--gold)' : 'var(--muted-foreground)' }}>
-                {won ? `+${fmtCrc(payout)} CRC` : lost ? 'No payout' : '—'}
+                {won ? `+${fmtDem(payout)} CRC` : lost ? 'No payout' : '—'}
               </span>
             </div>
           )}
           {claimed && (won || voided) ? (
             <div className="w-full mt-2 pill font-semibold py-2 text-center bg-muted text-muted-foreground">
-              ✓ {voided ? 'Refunded' : 'Claimed'}{payout > 0n ? ` · ${fmtCrc(payout)} CRC` : ''}
+              ✓ {voided ? 'Refunded' : 'Claimed'}{payout > 0n ? ` · ${fmtDem(payout)} CRC` : ''}
             </div>
           ) : (
             (won || voided) && payout > 0n && (
@@ -235,7 +238,7 @@ export function MatchCard({
                 className="w-full mt-2 pill font-bold py-2 text-primary-foreground"
                 style={{ background: 'var(--gold)' }}
               >
-                {busy ? 'Claiming…' : voided ? `Claim refund · ${fmtCrc(payout)} CRC` : `Claim winnings · ${fmtCrc(payout)} CRC`}
+                {busy ? 'Claiming…' : voided ? `Claim refund · ${fmtDem(payout)} CRC` : `Claim winnings · ${fmtDem(payout)} CRC`}
               </button>
             )
           )}
@@ -244,7 +247,7 @@ export function MatchCard({
 
       {/* Pool footer */}
       <div className="mt-3 pt-2 border-t border-border/60 flex justify-between text-[11px] text-muted-foreground font-mono">
-        <span>Pool {fmtCrc(pool)} CRC</span>
+        <span>Pool {fmtDem(pool)} CRC</span>
         <span>{status === 'None' ? 'opening soon' : 'parimutuel · no house'}</span>
       </div>
     </div>

@@ -3,7 +3,8 @@
 import type { Fixture } from '@/lib/fixtures';
 import type { MatchState } from '@/lib/golazo';
 import { OUTCOME, type OutcomeId } from '@/lib/contracts';
-import { fmtCrc, countdown } from '@/lib/format';
+import { countdown } from '@/lib/format';
+import { fmtDem } from '@/lib/demurrage';
 
 export type BetRow = {
   fixture: Fixture;
@@ -34,7 +35,7 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
         <h2 className="font-bold flex items-center gap-2">
           🎟️ Your bets <span className="text-muted-foreground font-normal text-sm">· {rows.length}</span>
         </h2>
-        <span className="text-sm font-mono">{fmtCrc(total)} CRC in play</span>
+        <span className="text-sm font-mono">{fmtDem(total)} CRC in play</span>
       </div>
 
       <div className="space-y-2">
@@ -60,14 +61,14 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
           let chipColor = 'var(--primary)';
           if (status === 'Resolved') {
             if (r.claimed) {
-              chipText = r.payout > 0n ? `Claimed +${fmtCrc(r.payout)}` : 'No win';
+              chipText = r.payout > 0n ? `Claimed +${fmtDem(r.payout)}` : 'No win';
               chipColor = 'var(--muted-foreground)';
             } else {
-              chipText = r.payout > 0n ? `Won +${fmtCrc(r.payout)}` : 'No win';
+              chipText = r.payout > 0n ? `Won +${fmtDem(r.payout)}` : 'No win';
               chipColor = r.payout > 0n ? 'var(--gold)' : 'var(--muted-foreground)';
             }
           } else if (status === 'Voided') {
-            chipText = r.claimed ? 'Refunded ✓' : `Refund ${fmtCrc(r.payout)}`;
+            chipText = r.claimed ? 'Refunded ✓' : `Refund ${fmtDem(r.payout)}`;
             chipColor = r.claimed ? 'var(--muted-foreground)' : 'var(--draw)';
           } else if (locked) {
             chipText = 'Locked';
@@ -90,7 +91,7 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
                 <span aria-hidden>{r.fixture.away.flag}</span>
               </span>
               <span className="font-mono text-xs text-muted-foreground truncate flex-1 text-right">
-                {picks.map((p) => `${fmtCrc(p.amt)} ${labels[p.o]}`).join(' · ')}
+                {picks.map((p) => `${fmtDem(p.amt)} ${labels[p.o]}`).join(' · ')}
               </span>
               <span
                 className="font-mono text-xs whitespace-nowrap shrink-0"
@@ -105,7 +106,7 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
 
       {claimable > 0n && (
         <p className="text-[11px] text-muted-foreground mt-2.5">
-          💰 {fmtCrc(claimable)} CRC ready to claim — open the match below and tap claim.
+          💰 {fmtDem(claimable)} CRC ready to claim — open the match below and tap claim.
         </p>
       )}
     </div>

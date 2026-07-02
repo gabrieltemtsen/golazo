@@ -26,6 +26,7 @@ import {
   type OutcomeId,
 } from './contracts';
 import { CRC_DECIMALS } from './format';
+import { toStatic } from './demurrage';
 
 export const STATUS = ['None', 'Open', 'Resolved', 'Voided'] as const;
 export type StatusName = (typeof STATUS)[number];
@@ -189,7 +190,9 @@ export async function buildStakeTxs(args: {
   amount: string;
   referrer?: Address | null;
 }): Promise<Tx[]> {
-  const amountWei = parseUnits(args.amount, CRC_DECIMALS);
+  // The user enters a demurraged (wallet-visible) amount; the token moves in
+  // static units, so convert before approving/staking.
+  const amountWei = toStatic(parseUnits(args.amount, CRC_DECIMALS));
   const txs: Tx[] = [];
 
   const allowance = await readAllowance(args.user);

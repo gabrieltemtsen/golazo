@@ -5,7 +5,7 @@ import { Users, Gift, Copy, Check } from 'lucide-react';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import type { ReferralStats } from '@/lib/golazo';
 import { inviteLink } from '@/lib/host';
-import { fmtCrc } from '@/lib/format';
+import { fmtDem } from '@/lib/demurrage';
 
 export function ReferralPanel({
   stats,
@@ -67,7 +67,7 @@ export function ReferralPanel({
           <>
             When your invite lands a <strong>brand-new Circles wallet</strong> that places its first
             stake, you instantly earn a{' '}
-            <span className="text-gold font-semibold font-mono">{fmtCrc(stats.bounty)} CRC</span>{' '}
+            <span className="text-gold font-semibold font-mono">{fmtDem(stats.bounty)} CRC</span>{' '}
             bounty — paid by the contract, no claim form. You also keep a slice of the rake every
             time a friend you brought in wins.
           </>
@@ -85,7 +85,7 @@ export function ReferralPanel({
         <>
           <div className="grid grid-cols-2 gap-2 mb-3">
             <Stat icon={<Users size={14} />} label="Wallets landed" value={stats.count.toString()} />
-            <Stat icon={<Gift size={14} />} label="Earned" value={`${fmtCrc(stats.credits)} CRC`} gold />
+            <Stat icon={<Gift size={14} />} label="Earned" value={`${fmtDem(stats.credits)} CRC`} gold />
           </div>
 
           <div className="flex gap-2 mb-2">
@@ -117,7 +117,7 @@ export function ReferralPanel({
               className="w-full pill font-bold py-2.5 text-primary-foreground"
               style={{ background: 'var(--gold)' }}
             >
-              {busy ? 'Claiming…' : `Withdraw ${fmtCrc(stats.credits)} CRC`}
+              {busy ? 'Claiming…' : `Withdraw ${fmtDem(stats.credits)} CRC`}
             </button>
           )}
         </>

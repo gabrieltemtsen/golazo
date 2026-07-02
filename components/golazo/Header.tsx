@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useWallet } from '@/components/wallet/WalletProvider';
-import { fmtCrc, shortAddr } from '@/lib/format';
+import { shortAddr } from '@/lib/format';
+import { fmtDem } from '@/lib/demurrage';
 import { CIRCLES_PLAYGROUND, appUrl } from '@/lib/host';
 
 export function Header({ balance }: { balance: bigint | null }) {
@@ -41,7 +42,7 @@ export function Header({ balance }: { balance: bigint | null }) {
           <div className="flex items-center gap-3">
             <div className="text-right leading-tight">
               <div className="text-sm font-semibold font-mono">
-                {balance === null ? '—' : `${fmtCrc(balance)} CRC`}
+                {balance === null ? '—' : `${fmtDem(balance)} gCRC`}
               </div>
               <div className="text-[11px] text-muted-foreground font-mono">
                 {shortAddr(address)}

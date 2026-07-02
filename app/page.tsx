@@ -10,7 +10,8 @@ import { MyBets, type BetRow } from '@/components/golazo/MyBets';
 import { FIXTURES } from '@/lib/fixtures';
 import { isConfigured, OUTCOME, HOST_AVATAR, type OutcomeId } from '@/lib/contracts';
 import { friendlyError } from '@/lib/errors';
-import { fmtCrc, CRC_DECIMALS } from '@/lib/format';
+import { CRC_DECIMALS } from '@/lib/format';
+import { fmtDem, toStatic } from '@/lib/demurrage';
 import { parseUnits } from 'viem';
 import {
   readMatch,
@@ -151,10 +152,11 @@ export default function Home() {
       return flash('err', 'Enter a valid amount, e.g. 5.');
     }
     if (amountWei <= 0n) return flash('err', 'Enter an amount greater than zero.');
-    if (balance !== null && amountWei > balance) {
+    // `amount` is a demurraged (wallet-visible) figure; balance is static.
+    if (balance !== null && toStatic(amountWei) > balance) {
       return flash(
         'err',
-        `Not enough CRC — you have ${fmtCrc(balance)}, this stake needs ${amount}. Lower it or top up.`
+        `Not enough gCRC — you have ${fmtDem(balance)}, this stake needs ${amount}. Lower it or top up.`
       );
     }
 
