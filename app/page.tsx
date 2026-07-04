@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { Address } from 'viem';
 import { useWallet } from '@/components/wallet/WalletProvider';
 import { Header } from '@/components/golazo/Header';
@@ -50,6 +51,7 @@ export default function Home() {
   const [showTrust, setShowTrust] = useState(false);
   const [trusting, setTrusting] = useState(false);
   const [trusted, setTrusted] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const [toast, setToast] = useState<{ kind: 'ok' | 'err' | 'info'; msg: string } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -343,7 +345,19 @@ export default function Home() {
       {/* Settled */}
       {settled.length > 0 && (
         <section className="mx-auto max-w-3xl px-4 mt-6">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Results</h2>
+          <button
+            onClick={() => setShowResults((v) => !v)}
+            className="w-full flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+            aria-expanded={showResults}
+          >
+            Results <span className="normal-case tracking-normal">· {settled.length}</span>
+            <ChevronDown
+              size={14}
+              className="ml-auto transition-transform"
+              style={{ transform: showResults ? 'rotate(180deg)' : 'none' }}
+            />
+          </button>
+          {showResults && (
           <div className="grid sm:grid-cols-2 gap-3">
             {settled.map((f) => (
               <div id={`match-${f.ref}`} key={f.ref} className="scroll-mt-20">
@@ -363,6 +377,7 @@ export default function Home() {
               </div>
             ))}
           </div>
+          )}
         </section>
       )}
 

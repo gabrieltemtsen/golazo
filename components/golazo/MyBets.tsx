@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { Fixture } from '@/lib/fixtures';
 import type { MatchState } from '@/lib/golazo';
 import { OUTCOME, type OutcomeId } from '@/lib/contracts';
@@ -19,6 +21,7 @@ export type BetRow = {
  * has backed, with amounts and live status, each row jumping to its card.
  */
 export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
+  const [open, setOpen] = useState(false);
   if (rows.length === 0) return null;
 
   const total = rows.reduce((a, r) => a + r.stake.home + r.stake.draw + r.stake.away, 0n);
@@ -31,14 +34,34 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
 
   return (
     <div className="card p-4">
-      <div className="flex items-center justify-between mb-3">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-2"
+        aria-expanded={open}
+      >
         <h2 className="font-bold flex items-center gap-2">
           🎟️ Your bets <span className="text-muted-foreground font-normal text-sm">· {rows.length}</span>
         </h2>
-        <span className="text-sm font-mono">{fmtDem(total)} CRC in play</span>
-      </div>
+        <span className="flex items-center gap-2">
+          {claimable > 0n && (
+            <span
+              className="pill px-2 py-0.5 text-[10px] font-semibold"
+              style={{ background: 'color-mix(in oklch, var(--gold) 20%, transparent)', color: 'var(--gold)' }}
+            >
+              💰 {fmtDem(claimable)} to claim
+            </span>
+          )}
+          <span className="text-sm font-mono text-muted-foreground">{fmtDem(total)} in play</span>
+          <ChevronDown
+            size={16}
+            className="text-muted-foreground transition-transform"
+            style={{ transform: open ? 'rotate(180deg)' : 'none' }}
+          />
+        </span>
+      </button>
 
-      <div className="space-y-2">
+      {open && (
+      <div className="space-y-2 mt-3">
         {rows.map((r) => {
           const labels: Record<OutcomeId, string> = {
             [OUTCOME.NONE]: '',
@@ -103,11 +126,6 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
           );
         })}
       </div>
-
-      {claimable > 0n && (
-        <p className="text-[11px] text-muted-foreground mt-2.5">
-          💰 {fmtDem(claimable)} CRC ready to claim — open the match below and tap claim.
-        </p>
       )}
     </div>
   );
