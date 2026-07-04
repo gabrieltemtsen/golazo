@@ -11,5 +11,13 @@
   { "ref": "WC2026-R32-SUIALG", "kickoff": "2026-07-03T03:00:00Z" },
   { "ref": "WC2026-R32-AUSEGY", "kickoff": "2026-07-03T18:00:00Z" },
   { "ref": "WC2026-R32-ARGCPV", "kickoff": "2026-07-03T22:00:00Z" },
-  { "ref": "WC2026-R32-COLGHA", "kickoff": "2026-07-04T01:30:00Z" }
+  { "ref": "WC2026-R32-COLGHA", "kickoff": "2026-07-04T01:30:00Z" },
+  { "ref": "WC2026-R16-CANMAR", "kickoff": "2026-07-04T17:00:00Z" },
+  { "ref": "WC2026-R16-BRANOR", "kickoff": "2026-07-04T20:00:00Z" },
+  { "ref": "WC2026-R16-PARFRA", "kickoff": "2026-07-04T21:00:00Z" },
+  { "ref": "WC2026-R16-MEXENG", "kickoff": "2026-07-05T00:00:00Z" },
+  { "ref": "WC2026-R16-PORESP", "kickoff": "2026-07-05T19:00:00Z" },
+  { "ref": "WC2026-R16-USABEL", "kickoff": "2026-07-06T00:00:00Z" },
+  { "ref": "WC2026-R16-ARGEGY", "kickoff": "2026-07-05T16:00:00Z" },
+  { "ref": "WC2026-R16-SUICOL", "kickoff": "2026-07-05T20:00:00Z" }
 ]
