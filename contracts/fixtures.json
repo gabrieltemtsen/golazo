@@ -19,5 +19,9 @@
   { "ref": "WC2026-R16-PORESP", "kickoff": "2026-07-05T19:00:00Z" },
   { "ref": "WC2026-R16-USABEL", "kickoff": "2026-07-06T00:00:00Z" },
   { "ref": "WC2026-R16-ARGEGY", "kickoff": "2026-07-05T16:00:00Z" },
-  { "ref": "WC2026-R16-SUICOL", "kickoff": "2026-07-05T20:00:00Z" }
+  { "ref": "WC2026-R16-SUICOL", "kickoff": "2026-07-05T20:00:00Z" },
+  { "ref": "WC2026-QF-FRAMAR", "kickoff": "2026-07-09T20:00:00Z" },
+  { "ref": "WC2026-QF-ESPBEL", "kickoff": "2026-07-10T19:00:00Z" },
+  { "ref": "WC2026-QF-NORENG", "kickoff": "2026-07-11T21:00:00Z" },
+  { "ref": "WC2026-QF-ARGSUI", "kickoff": "2026-07-12T01:00:00Z" }
 ]

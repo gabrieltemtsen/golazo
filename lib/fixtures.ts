@@ -191,6 +191,38 @@ export const FIXTURES: Fixture[] = [
     kickoff: '2026-07-05T20:00:00Z',
     group: 'Round of 16',
   },
+  {
+    ref: 'WC2026-QF-FRAMAR',
+    home: T('France', '🇫🇷', 'FRA'),
+    away: T('Morocco', '🇲🇦', 'MAR'),
+    venue: 'Foxborough',
+    kickoff: '2026-07-09T20:00:00Z',
+    group: 'Quarter-final',
+  },
+  {
+    ref: 'WC2026-QF-ESPBEL',
+    home: T('Spain', '🇪🇸', 'ESP'),
+    away: T('Belgium', '🇧🇪', 'BEL'),
+    venue: 'Inglewood',
+    kickoff: '2026-07-10T19:00:00Z',
+    group: 'Quarter-final',
+  },
+  {
+    ref: 'WC2026-QF-NORENG',
+    home: T('Norway', '🇳🇴', 'NOR'),
+    away: T('England', '🏴', 'ENG'),
+    venue: 'Miami',
+    kickoff: '2026-07-11T21:00:00Z',
+    group: 'Quarter-final',
+  },
+  {
+    ref: 'WC2026-QF-ARGSUI',
+    home: T('Argentina', '🇦🇷', 'ARG'),
+    away: T('Switzerland', '🇨🇭', 'SUI'),
+    venue: 'Kansas City',
+    kickoff: '2026-07-12T01:00:00Z',
+    group: 'Quarter-final',
+  },
 ];
 
 export function fixtureByRef(ref: string): Fixture | undefined {
