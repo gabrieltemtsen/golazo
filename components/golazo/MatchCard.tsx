@@ -69,6 +69,9 @@ export function MatchCard({
   const balanceNum =
     balance == null ? null : Number(formatUnits(toDemurraged(balance), CRC_DECIMALS));
   const notEnough = connected && balanceNum != null && Number(amount || 0) > balanceNum;
+  // The stake button is only actionable once an outcome is picked and the
+  // amount is valid; otherwise it renders muted with a guiding label.
+  const ready = connected && pick !== null && !!amount && Number(amount) > 0 && !notEnough && !busy;
 
   const outcomeLabels: Record<OutcomeId, string> = {
     [OUTCOME.NONE]: '',
@@ -192,16 +195,20 @@ export function MatchCard({
           </div>
 
           <button
-            disabled={!connected || pick === null || !amount || Number(amount) <= 0 || notEnough || busy}
+            disabled={!ready}
             onClick={() => pick !== null && onStake(fixture.ref, pick, amount)}
-            className="w-full mt-2 pill bg-primary text-primary-foreground font-bold py-2.5 disabled:opacity-50"
+            className={`w-full mt-2 pill font-bold py-2.5 transition ${
+              ready
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground cursor-not-allowed'
+            }`}
           >
             {busy
               ? 'Submitting…'
               : !connected
               ? 'Connect to back a result'
               : pick === null
-              ? 'Pick a result'
+              ? `👆 Tap ${outcomeLabels[OUTCOME.HOME]}, Draw or ${outcomeLabels[OUTCOME.AWAY]} above`
               : notEnough
               ? `Not enough gCRC · you have ${fmtDem(balance ?? 0n)}`
               : `Back ${outcomeLabels[pick]} · win ~${(decimalOdds(totals[pick], pool) * Number(amount || 0)).toFixed(1)} CRC`}
