@@ -20,7 +20,15 @@ export type BetRow = {
  * A single place that answers "where are my stakes?" — every match the user
  * has backed, with amounts and live status, each row jumping to its card.
  */
-export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
+export function MyBets({
+  rows,
+  now,
+  onGoToClaim,
+}: {
+  rows: BetRow[];
+  now: number;
+  onGoToClaim?: () => void;
+}) {
   const [open, setOpen] = useState(false);
   if (rows.length === 0) return null;
 
@@ -43,14 +51,6 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
           🎟️ Your bets <span className="text-muted-foreground font-normal text-sm">· {rows.length}</span>
         </h2>
         <span className="flex items-center gap-2">
-          {claimable > 0n && (
-            <span
-              className="pill px-2 py-0.5 text-[10px] font-semibold"
-              style={{ background: 'color-mix(in oklch, var(--gold) 20%, transparent)', color: 'var(--gold)' }}
-            >
-              💰 {fmtDem(claimable)} to claim
-            </span>
-          )}
           <span className="text-sm font-mono text-muted-foreground">{fmtDem(total)} in play</span>
           <ChevronDown
             size={16}
@@ -59,6 +59,16 @@ export function MyBets({ rows, now }: { rows: BetRow[]; now: number }) {
           />
         </span>
       </button>
+
+      {claimable > 0n && (
+        <button
+          onClick={onGoToClaim}
+          className="w-full mt-3 pill font-bold py-2.5 text-primary-foreground flex items-center justify-center gap-1.5"
+          style={{ background: 'var(--gold)' }}
+        >
+          💰 Claim {fmtDem(claimable)} gCRC →
+        </button>
+      )}
 
       {open && (
       <div className="space-y-2 mt-3">

@@ -262,6 +262,22 @@ export default function Home() {
     claimed: claims[f.ref] ?? false,
   })).filter((r) => r.stake.home + r.stake.draw + r.stake.away > 0n);
 
+  // Expand Results and scroll to the first match with claimable CRC, so users
+  // aren't hunting for the claim button.
+  const firstClaimableRef = betRows.find(
+    (r) => (r.state?.status === 'Resolved' || r.state?.status === 'Voided') && !r.claimed && r.payout > 0n
+  )?.fixture.ref;
+
+  function goToClaim() {
+    setShowResults(true);
+    window.setTimeout(() => {
+      const el =
+        (firstClaimableRef && document.getElementById(`match-${firstClaimableRef}`)) ||
+        document.getElementById('results');
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 60);
+  }
+
   return (
     <div className="min-h-full pb-24">
       <Header balance={balance} />
@@ -304,7 +320,7 @@ export default function Home() {
       {/* Your bets — single place that answers "where are my stakes?" */}
       {isConnected && betRows.length > 0 && (
         <section className="mx-auto max-w-3xl px-4 mt-3">
-          <MyBets rows={betRows} now={now} />
+          <MyBets rows={betRows} now={now} onGoToClaim={goToClaim} />
         </section>
       )}
 
@@ -344,7 +360,7 @@ export default function Home() {
 
       {/* Settled */}
       {settled.length > 0 && (
-        <section className="mx-auto max-w-3xl px-4 mt-6">
+        <section id="results" className="mx-auto max-w-3xl px-4 mt-6 scroll-mt-20">
           <button
             onClick={() => setShowResults((v) => !v)}
             className="w-full flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
