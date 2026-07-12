@@ -23,5 +23,7 @@
   { "ref": "WC2026-QF-FRAMAR", "kickoff": "2026-07-09T20:00:00Z" },
   { "ref": "WC2026-QF-ESPBEL", "kickoff": "2026-07-10T19:00:00Z" },
   { "ref": "WC2026-QF-NORENG", "kickoff": "2026-07-11T21:00:00Z" },
-  { "ref": "WC2026-QF-ARGSUI", "kickoff": "2026-07-12T01:00:00Z" }
+  { "ref": "WC2026-QF-ARGSUI", "kickoff": "2026-07-12T01:00:00Z" },
+  { "ref": "WC2026-SF-FRAESP", "kickoff": "2026-07-14T19:00:00Z" },
+  { "ref": "WC2026-SF-ENGARG", "kickoff": "2026-07-15T19:00:00Z" }
 ]

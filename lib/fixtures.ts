@@ -223,6 +223,22 @@ export const FIXTURES: Fixture[] = [
     kickoff: '2026-07-12T01:00:00Z',
     group: 'Quarter-final',
   },
+  {
+    ref: 'WC2026-SF-FRAESP',
+    home: T('France', '🇫🇷', 'FRA'),
+    away: T('Spain', '🇪🇸', 'ESP'),
+    venue: 'Arlington',
+    kickoff: '2026-07-14T19:00:00Z',
+    group: 'Semi-final',
+  },
+  {
+    ref: 'WC2026-SF-ENGARG',
+    home: T('England', '🏴', 'ENG'),
+    away: T('Argentina', '🇦🇷', 'ARG'),
+    venue: 'Atlanta',
+    kickoff: '2026-07-15T19:00:00Z',
+    group: 'Semi-final',
+  },
 ];
 
 export function fixtureByRef(ref: string): Fixture | undefined {
