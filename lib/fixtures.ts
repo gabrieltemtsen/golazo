@@ -239,6 +239,22 @@ export const FIXTURES: Fixture[] = [
     kickoff: '2026-07-15T19:00:00Z',
     group: 'Semi-final',
   },
+  {
+    ref: 'WC2026-3P-FRAENG',
+    home: T('France', '🇫🇷', 'FRA'),
+    away: T('England', '🏴', 'ENG'),
+    venue: 'Miami',
+    kickoff: '2026-07-18T21:00:00Z',
+    group: 'Third place',
+  },
+  {
+    ref: 'WC2026-FINAL-ESPARG',
+    home: T('Spain', '🇪🇸', 'ESP'),
+    away: T('Argentina', '🇦🇷', 'ARG'),
+    venue: 'East Rutherford',
+    kickoff: '2026-07-19T19:00:00Z',
+    group: 'Final',
+  },
 ];
 
 export function fixtureByRef(ref: string): Fixture | undefined {
